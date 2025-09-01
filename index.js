@@ -43,7 +43,7 @@ function element(tag, classes, props, textContent, children) {
 
 /** @returns {Promise<Schedule>} */
 function loadSchedule(src) {
-	return axios.get('/schedules/' + src).then(response => response.data);
+	return axios.get('/schedules/' + src + '.json').then(response => response.data);
 }
 
 function addProgress(container, start, end) {
@@ -98,7 +98,7 @@ function renderDaySchedule(schedule, daySchedule, dayOfWeek) {
 		container.id = 'today';
 	}
 	
-	container.append(element('div', ['card-body', 'flex-grow-0', 'd-flex', 'align-items-center'], null, null, [
+	container.append(element('div', ['card-body', 'flex-grow-0', 'd-flex', 'align-items-baseline', 'gap-3'], null, null, [
 		element('h4', ['my-0', 'text-capitalize'], null, time.format('dddd')),
 		element('span', ['flex-grow-1', 'text-secondary', 'text-end'], null, time.format('D MMMM'))
 	]));
@@ -165,7 +165,8 @@ function tick() {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-	const scheduleSrc = document.getElementById('schedule-src')?.value;
+	const urlParams = new URLSearchParams(window.location.search);
+	const scheduleSrc = urlParams.get('schedule') ?? '1a';
 	const root = document.getElementById('root');
 	
 	if (!scheduleSrc) {
