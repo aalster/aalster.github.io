@@ -120,7 +120,7 @@ function renderSchedule(schedule) {
 	const container = element('div');
 	document.title = schedule.title;
 	container.append(element('h1', 'mb-1', null, schedule.title));
-	container.append(element('div', ['text-secondary', 'mb-5'], {id: 'current-time'}));
+	container.append(element('div', ['text-secondary', 'mb-4'], {id: 'current-time'}));
 	
 	const daysNode = element('div', ['timetable-grid'], {id: 'timetable'});
 	let dayOfWeek = 0;
