@@ -185,4 +185,20 @@ document.addEventListener("DOMContentLoaded", function() {
 			root.append(element('div', ['text-center', 'text-danger'], {}, 'Помилка'));
 		})
 		.finally(() => document.getElementById('spinner').remove());
+	
+	document.querySelectorAll('button[data-schedule]').forEach(button => {
+		const schedule = button.getAttribute('data-schedule');
+		if (schedule === scheduleSrc) {
+			button.classList.add('btn-primary');
+			button.classList.remove('btn-light');
+		} else {
+			button.classList.add('btn-light');
+			button.classList.remove('btn-primary');
+		}
+		button.addEventListener('click', function () {
+			const params = new URLSearchParams(location.search);
+			params.set('schedule', schedule);
+			window.location.search = params.toString();
+		});
+	});
 });

@@ -1,3 +1,7 @@
+html {
+    overflow-y: scroll;
+}
+
 .timetable-grid {
     display: grid;
     grid-template-columns: 1fr;
