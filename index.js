@@ -53,7 +53,7 @@ function renderLesson(schedule, number, lesson) {
 	}
 	container.append(element('div', ['fw-bold'], null, number + 1));
 	container.append(element('div', null, null, lesson));
-	container.append(element('div', ['flex-grow-1', 'text-secondary', 'text-end'], null, period));
+	container.append(element('small', ['flex-grow-1', 'flex-shrink-0', 'text-secondary', 'text-end'], null, period));
 	return container;
 }
 
