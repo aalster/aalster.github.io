@@ -1,3 +1,12 @@
+const axios = window.axios;
+
+const moment = window.moment;
+moment.updateLocale('uk', {
+	week : {
+		dow : 1
+	}
+});
+
 function element(tag, classes, props, textContent, children) {
 	const element = document.createElement(tag);
 	if (classes) {
@@ -44,13 +53,18 @@ function renderLesson(schedule, number, lesson) {
 	const container = element('div', ['d-flex', 'align-items-center', 'gap-3']);
 	container.append(element('div', ['fw-bold'], null, number));
 	container.append(element('div', null, null, lesson));
-	container.append(element('div', ['flex-grow-1', 'text-secondary', 'text-end'], null, lessonPeriod(schedule.start[number], schedule.lessonDuration)));
+	container.append(element('div', ['flex-grow-1', 'text-secondary', 'text-end'], null, lessonPeriod(schedule.starts[number], schedule.lessonDuration)));
 	return container;
 }
 
-function renderDaySchedule(schedule, daySchedule) {
+function renderDaySchedule(schedule, daySchedule, dayOfWeek) {
+	const time = moment().weekday(dayOfWeek);
+	
 	const container = element('div', 'card-body');
-	container.append(element('h4', ['card-title', 'mb-3'], null, daySchedule.day));
+	container.append(element('div', ['d-flex', 'align-items-center', 'mb-3', 'text-capitalize'], null, null, [
+		element('h4', 'my-0', null, time.format('dddd')),
+		element('span', ['flex-grow-1', 'text-secondary', 'text-end'], null, time.format('D MMMM'))
+	]));
 	
 	const lessons = element('div', ['d-flex', 'flex-column', 'gap-2']);
 	let number = 1;
@@ -65,16 +79,26 @@ function renderDaySchedule(schedule, daySchedule) {
 
 function renderSchedule(schedule) {
 	const container = element('div');
-	container.append(element('h1', 'mb-5', {}, schedule.title));
 	document.title = schedule.title;
+	container.append(element('h1', 'mb-1', null, schedule.title));
+	container.append(element('div', ['text-secondary', 'mb-5'], {id: 'current-time'}));
 	
 	const daysNode = element('div', ['timetable-grid']);
+	let dayOfWeek = 0;
 	for (const daySchedule of schedule.schedule) {
-		daysNode.append(renderDaySchedule(schedule, daySchedule));
+		daysNode.append(renderDaySchedule(schedule, daySchedule, dayOfWeek));
+		dayOfWeek++;
 	}
 	container.append(daysNode);
 	
 	return container;
+}
+
+function tick() {
+	const currentTime = document.getElementById('current-time');
+	if (currentTime) {
+		currentTime.textContent = moment().format('D MMMM YYYY H:mm');
+	}
 }
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -89,7 +113,12 @@ document.addEventListener("DOMContentLoaded", function() {
 	loadSchedule(scheduleSrc)
 		.then(response => {
 			root.append(renderSchedule(response.data));
+			tick();
+			window.setInterval(tick, 10000);
 		})
-		.catch(() => root.append(element('div', ['text-center', 'text-danger'], {}, 'Помилка')))
+		.catch(error => {
+			console.error(error);
+			root.append(element('div', ['text-center', 'text-danger'], {}, 'Помилка'));
+		})
 		.finally(() => document.getElementById('spinner').remove());
 });
