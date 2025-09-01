@@ -1,3 +1,16 @@
+/**
+ * @typedef {Object} ScheduleDay
+ * @property {string[]} lessons
+ */
+
+/**
+ * @typedef {Object} Schedule
+ * @property {string} title
+ * @property {number} lessonDuration
+ * @property {string[]} starts
+ * @property {ScheduleDay[]} schedule
+ */
+
 const axios = window.axios;
 
 const moment = window.moment;
@@ -28,13 +41,14 @@ function element(tag, classes, props, textContent, children) {
 	return element;
 }
 
+/** @returns {Promise<Schedule>} */
 function loadSchedule(src) {
-	return axios.get('/schedules/' + src);
+	return axios.get('/schedules/' + src).then(response => response.data);
 }
 
 function addProgress(container, start, end) {
-	container.setAttribute('data-start', start);
-	container.setAttribute('data-end', end);
+	container.setAttribute('data-start', start.format('HH:mm'));
+	container.setAttribute('data-end', end.format('HH:mm'));
 	container.append(element('div', 'progress-background', null, null, [
 		element('div', 'progress-indicator')
 	]));
@@ -42,16 +56,17 @@ function addProgress(container, start, end) {
 
 function renderLesson(schedule, number, lesson) {
 	const container = element('li', ['with-progress', 'list-group-item', 'border-0',
-		'position-relative', 'z-0', 'd-flex', 'align-items-center', 'gap-3']);
-	const start = schedule.starts[number];
+		'position-relative', 'z-0', 'd-flex', 'align-items-center', 'gap-2']);
+	const startStr = schedule.starts[number];
 	let period = '';
-	if (start && schedule.lessonDuration) {
-		const end = moment(start, 'HH:mm').add(schedule.lessonDuration, 'minutes').format('HH:mm');
-		period = start + ' - ' + end;
+	if (startStr && schedule.lessonDuration) {
+		const start = moment(startStr, 'HH:mm');
+		const end = moment(start).add(schedule.lessonDuration, 'minutes');
+		period = start.format('HH:mm') + ' - ' + end.format('HH:mm');
 		
 		addProgress(container, start, end);
 	}
-	container.append(element('div', ['fw-bold'], null, number + 1));
+	container.append(element('div', 'fw-bold', null, number + 1));
 	container.append(element('div', null, null, lesson));
 	container.append(element('small', ['flex-grow-1', 'flex-shrink-0', 'text-secondary', 'text-end'], null, period));
 	return container;
@@ -64,7 +79,7 @@ function renderBreak(schedule, number) {
 		const startMoment = moment(schedule.starts[number - 1], 'HH:mm').add(schedule.lessonDuration, 'minutes');
 		const endMoment = moment(schedule.starts[number], 'HH:mm');
 		const diff = moment.duration(endMoment.diff(startMoment)).humanize();
-		addProgress(container, startMoment.format('HH:mm'), endMoment.format('HH:mm'));
+		addProgress(container, startMoment, endMoment);
 		container.append(element('div', ['text-secondary', 'text-center'], null, 'Перерва ' + diff));
 	}
 	return container;
@@ -83,8 +98,8 @@ function renderDaySchedule(schedule, daySchedule, dayOfWeek) {
 		container.id = 'today';
 	}
 	
-	container.append(element('div', ['card-body', 'flex-grow-0', 'd-flex', 'align-items-center', 'text-capitalize'], null, null, [
-		element('h4', 'my-0', null, time.format('dddd')),
+	container.append(element('div', ['card-body', 'flex-grow-0', 'd-flex', 'align-items-center'], null, null, [
+		element('h4', ['my-0', 'text-capitalize'], null, time.format('dddd')),
 		element('span', ['flex-grow-1', 'text-secondary', 'text-end'], null, time.format('D MMMM'))
 	]));
 	
@@ -159,8 +174,8 @@ document.addEventListener("DOMContentLoaded", function() {
 	}
 	
 	loadSchedule(scheduleSrc)
-		.then(response => {
-			root.append(renderSchedule(response.data));
+		.then(data => {
+			root.append(renderSchedule(data));
 			tick();
 			window.setInterval(tick, 10000);
 		})

@@ -55,3 +55,7 @@
     height: 100%;
     background-color: #d1e7dd;
 }
+
+#today.card {
+    box-shadow: 0 0 4px rgba(13, 110, 253, 0.25);
+}
