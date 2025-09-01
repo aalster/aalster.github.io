@@ -74,7 +74,10 @@ function renderDaySchedule(schedule, daySchedule, dayOfWeek) {
 	}
 	container.append(lessons);
 	
-	return element('div', 'card', null, null, container);
+	const classes = ['card'];
+	if (moment().dayOfYear() === time.dayOfYear())
+		classes.push('border-primary');
+	return element('div', classes, null, null, container);
 }
 
 function renderSchedule(schedule) {
