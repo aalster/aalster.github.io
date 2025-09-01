@@ -22,3 +22,36 @@
         grid-column: 2;
     }
 }
+
+.progress-background {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+}
+
+.active-progress .progress-background {
+    display: block;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.lesson-break {
+    display: none;
+}
+
+.lesson-break.active-progress {
+    display: block;
+}
+
+.progress-background .progress-indicator {
+    height: 100%;
+    background-color: #cfe2ff;
+}
+
+.lesson-break .progress-background .progress-indicator {
+    height: 100%;
+    background-color: #d1e7dd;
+}

@@ -7,6 +7,8 @@ moment.updateLocale('uk', {
 	}
 });
 
+const pageLoadDay = moment().dayOfYear();
+
 function element(tag, classes, props, textContent, children) {
 	const element = document.createElement(tag);
 	if (classes) {
@@ -15,7 +17,7 @@ function element(tag, classes, props, textContent, children) {
 	}
 	if (props) {
 		for (const key in props)
-			element[key] = props[key];
+			element.setAttribute(key, props[key]);
 	}
 	if (textContent)
 		element.textContent = textContent;
@@ -30,54 +32,73 @@ function loadSchedule(src) {
 	return axios.get('/schedules/' + src);
 }
 
-function timeToMinutes(time) {
-	if (Number.isInteger(time))
-		return time;
-	const [hours, minutes] = time.split(":");
-	return hours * 60 + +minutes;
-}
-
-function minutesToTime(minutes) {
-	const hours = Math.trunc(minutes / 60);
-	minutes = minutes % 60;
-	return hours + ":" + minutes;
-}
-
-function lessonPeriod(start, addition) {
-	if (!start)
-		return '';
-	return start + " - " + minutesToTime(timeToMinutes(start) + addition);
+function addProgress(container, start, end) {
+	container.setAttribute('data-start', start);
+	container.setAttribute('data-end', end);
+	container.append(element('div', 'progress-background', null, null, [
+		element('div', 'progress-indicator')
+	]));
 }
 
 function renderLesson(schedule, number, lesson) {
-	const container = element('div', ['d-flex', 'align-items-center', 'gap-3']);
-	container.append(element('div', ['fw-bold'], null, number));
+	const container = element('li', ['with-progress', 'list-group-item', 'border-0',
+		'position-relative', 'z-0', 'd-flex', 'align-items-center', 'gap-3']);
+	const start = schedule.starts[number];
+	let period = '';
+	if (start && schedule.lessonDuration) {
+		const end = moment(start, 'HH:mm').add(schedule.lessonDuration, 'minutes').format('HH:mm');
+		period = start + ' - ' + end;
+		
+		addProgress(container, start, end);
+	}
+	container.append(element('div', ['fw-bold'], null, number + 1));
 	container.append(element('div', null, null, lesson));
-	container.append(element('div', ['flex-grow-1', 'text-secondary', 'text-end'], null, lessonPeriod(schedule.starts[number], schedule.lessonDuration)));
+	container.append(element('div', ['flex-grow-1', 'text-secondary', 'text-end'], null, period));
+	return container;
+}
+
+function renderBreak(schedule, number) {
+	const container = element('li', ['with-progress', 'lesson-break', 'list-group-item', 'border-0',
+		'position-relative', 'z-0']);
+	if (schedule.starts[number - 1] && schedule.starts[number] && schedule.lessonDuration) {
+		const startMoment = moment(schedule.starts[number - 1], 'HH:mm').add(schedule.lessonDuration, 'minutes');
+		const endMoment = moment(schedule.starts[number], 'HH:mm');
+		const diff = moment.duration(endMoment.diff(startMoment)).humanize();
+		addProgress(container, startMoment.format('HH:mm'), endMoment.format('HH:mm'));
+		container.append(element('div', ['text-secondary', 'text-center'], null, 'Перерва ' + diff));
+	}
 	return container;
 }
 
 function renderDaySchedule(schedule, daySchedule, dayOfWeek) {
+	// const time = moment().startOf('week').weekday(dayOfWeek);
 	const time = moment().weekday(dayOfWeek);
+	const isToday = moment().dayOfYear() === time.dayOfYear();
 	
-	const container = element('div', 'card-body');
-	container.append(element('div', ['d-flex', 'align-items-center', 'mb-3', 'text-capitalize'], null, null, [
+	const classes = ['card', 'pb-3'];
+	if (isToday)
+		classes.push('border-primary');
+	const container = element('div', classes, {'data-day-of-week': dayOfWeek}, null);
+	if (isToday) {
+		container.id = 'today';
+	}
+	
+	container.append(element('div', ['card-body', 'flex-grow-0', 'd-flex', 'align-items-center', 'text-capitalize'], null, null, [
 		element('h4', 'my-0', null, time.format('dddd')),
 		element('span', ['flex-grow-1', 'text-secondary', 'text-end'], null, time.format('D MMMM'))
 	]));
 	
-	const lessons = element('div', ['d-flex', 'flex-column', 'gap-2']);
-	let number = 1;
+	const lessons = element('ul', ['list-group', 'list-group-flush', 'border-0']);
+	let number = 0;
 	for (const lesson of daySchedule.lessons) {
+		if (isToday && (number > 0))
+			lessons.append(renderBreak(schedule, number));
 		lessons.append(renderLesson(schedule, number, lesson));
 		number++;
 	}
 	container.append(lessons);
 	
-	const classes = ['card'];
-	if (moment().dayOfYear() === time.dayOfYear())
-		classes.push('border-primary');
-	return element('div', classes, null, null, container);
+	return container;
 }
 
 function renderSchedule(schedule) {
@@ -86,7 +107,7 @@ function renderSchedule(schedule) {
 	container.append(element('h1', 'mb-1', null, schedule.title));
 	container.append(element('div', ['text-secondary', 'mb-5'], {id: 'current-time'}));
 	
-	const daysNode = element('div', ['timetable-grid']);
+	const daysNode = element('div', ['timetable-grid'], {id: 'timetable'});
 	let dayOfWeek = 0;
 	for (const daySchedule of schedule.schedule) {
 		daysNode.append(renderDaySchedule(schedule, daySchedule, dayOfWeek));
@@ -98,9 +119,33 @@ function renderSchedule(schedule) {
 }
 
 function tick() {
+	const now = moment();
+	
+	if (pageLoadDay !== now.dayOfYear()) {
+		window.location.reload();
+		return;
+	}
+	
 	const currentTime = document.getElementById('current-time');
 	if (currentTime) {
-		currentTime.textContent = moment().format('D MMMM YYYY H:mm');
+		currentTime.textContent = now.format('D MMMM YYYY H:mm');
+	}
+	const currentDayNode = document.getElementById('today');
+	if (currentDayNode) {
+		currentDayNode.querySelectorAll('.with-progress').forEach(node => {
+			const start = moment(node.getAttribute('data-start'), 'HH:mm');
+			const end = moment(node.getAttribute('data-end'), 'HH:mm');
+			if (now.isBetween(start, end)) {
+				node.classList.add('active-progress');
+				const progressNode = node.querySelector('.progress-indicator');
+				if (progressNode) {
+					const progress = now.diff(start) / end.diff(start);
+					progressNode.style.width = progress * 100 + '%';
+				}
+			} else {
+				node.classList.remove('active-progress');
+			}
+		});
 	}
 }
 
