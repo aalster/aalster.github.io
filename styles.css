@@ -40,7 +40,7 @@ html {
 
 .active-progress .progress-background {
     display: block;
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: rgba(0, 0, 0, 0.04);
 }
 
 .lesson-break {
@@ -62,5 +62,5 @@ html {
 }
 
 #today.card {
-    box-shadow: 0 0 4px rgba(13, 110, 253, 0.25);
+    box-shadow: 0 0 8px rgba(13, 110, 253, 0.25);
 }

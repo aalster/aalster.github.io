@@ -5,7 +5,6 @@
 
 /**
  * @typedef {Object} Schedule
- * @property {string} title
  * @property {number} lessonDuration
  * @property {string[]} starts
  * @property {ScheduleDay[]} schedule
@@ -47,6 +46,7 @@ function loadSchedule(src) {
 }
 
 function addProgress(container, start, end) {
+	container.classList.add('with-progress', 'position-relative', 'z-0');
 	container.setAttribute('data-start', start.format('HH:mm'));
 	container.setAttribute('data-end', end.format('HH:mm'));
 	container.append(element('div', 'progress-background', null, null, [
@@ -55,8 +55,7 @@ function addProgress(container, start, end) {
 }
 
 function renderLesson(schedule, number, lesson) {
-	const container = element('li', ['with-progress', 'list-group-item', 'border-0',
-		'position-relative', 'z-0', 'd-flex', 'align-items-center', 'gap-2']);
+	const container = element('li', ['list-group-item', 'border-0', 'd-flex', 'align-items-center', 'gap-2']);
 	const startStr = schedule.starts[number];
 	let period = '';
 	if (startStr && schedule.lessonDuration) {
@@ -73,8 +72,7 @@ function renderLesson(schedule, number, lesson) {
 }
 
 function renderBreak(schedule, number) {
-	const container = element('li', ['with-progress', 'lesson-break', 'list-group-item', 'border-0',
-		'position-relative', 'z-0']);
+	const container = element('li', ['lesson-break', 'list-group-item', 'border-0']);
 	if (schedule.starts[number - 1] && schedule.starts[number] && schedule.lessonDuration) {
 		const startMoment = moment(schedule.starts[number - 1], 'HH:mm').add(schedule.lessonDuration, 'minutes');
 		const endMoment = moment(schedule.starts[number], 'HH:mm');
@@ -86,7 +84,6 @@ function renderBreak(schedule, number) {
 }
 
 function renderDaySchedule(schedule, daySchedule, dayOfWeek) {
-	// const time = moment().startOf('week').weekday(dayOfWeek);
 	const time = moment().weekday(dayOfWeek);
 	const isToday = moment().dayOfYear() === time.dayOfYear();
 	
@@ -118,8 +115,6 @@ function renderDaySchedule(schedule, daySchedule, dayOfWeek) {
 
 function renderSchedule(schedule) {
 	const container = element('div');
-	document.title = schedule.title;
-	container.append(element('h1', 'mb-1', null, schedule.title));
 	container.append(element('div', ['text-secondary', 'mb-4'], {id: 'current-time'}));
 	
 	const daysNode = element('div', ['timetable-grid'], {id: 'timetable'});
@@ -178,7 +173,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		.then(data => {
 			root.append(renderSchedule(data));
 			tick();
-			window.setInterval(tick, 10000);
+			window.setInterval(tick, 5000);
 		})
 		.catch(error => {
 			console.error(error);
