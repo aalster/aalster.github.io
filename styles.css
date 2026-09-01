@@ -2,6 +2,18 @@ html {
     overflow-y: scroll;
 }
 
+/* Ширина контенту дорівнює ширині таблиці розкладу,
+   щоб кнопки в шапці вирівнювались по її правому краю */
+main {
+    text-align: center;
+}
+
+.page-content {
+    display: inline-block;
+    min-width: 100%;
+    text-align: start;
+}
+
 .timetable-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -14,6 +26,10 @@ html {
 }
 
 @media (min-width: 992px) {
+    .page-content {
+        min-width: 0;
+    }
+
     .timetable-grid {
         display: inline-grid;
         grid-template-columns: 1fr 1fr;

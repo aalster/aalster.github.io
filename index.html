@@ -10,18 +10,29 @@
 <body>
 
 <main class="container mt-2 mb-3">
-	<div class="d-flex flex-wrap-reverse align-items-start gap-3 mb-1">
-		<h1 class="mb-0">Розклад занять</h1>
-		<div>
-			<button data-schedule="1a" class="btn btn-light">1А</button>
-<!--			<button data-schedule="test" class="btn btn-light">test</button>-->
-<!--			<button data-schedule="test2" class="btn btn-light">test2</button>-->
+	<div class="page-content">
+		<div class="d-flex flex-wrap-reverse align-items-start gap-3 mb-1">
+			<h1 class="mb-0">Розклад занять</h1>
+			<div class="ms-auto d-flex gap-2">
+				<input type="hidden" id="default-schedule" value="2b">
+				<button data-schedule="2b" class="btn btn-light">2Б</button>
+<!--				<button data-schedule="test" class="btn btn-light">test</button>-->
+<!--				<button data-schedule="test2" class="btn btn-light">test2</button>-->
+				<div class="dropdown">
+					<button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+						Попередні
+					</button>
+					<ul class="dropdown-menu">
+						<li><button data-schedule="1a" class="dropdown-item" type="button">1А</button></li>
+					</ul>
+				</div>
+			</div>
 		</div>
-	</div>
-	<div id="spinner" class="text-center mt-5">
-		<div class="spinner-border text-primary" role="status"></div>
-	</div>
-	<div id="root">
+		<div id="spinner" class="text-center mt-5">
+			<div class="spinner-border text-primary" role="status"></div>
+		</div>
+		<div id="root">
+		</div>
 	</div>
 </main>
 

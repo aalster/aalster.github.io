@@ -55,7 +55,7 @@ function addProgress(container, start, end) {
 }
 
 function renderLesson(schedule, number, lesson) {
-	const container = element('li', ['list-group-item', 'border-0', 'd-flex', 'align-items-center', 'gap-2']);
+	const container = element('li', ['list-group-item', 'border-0', 'd-flex', 'align-items-baseline', 'gap-2']);
 	const startStr = schedule.starts[number];
 	let period = '';
 	if (startStr && schedule.lessonDuration) {
@@ -67,7 +67,7 @@ function renderLesson(schedule, number, lesson) {
 	}
 	container.append(element('div', 'fw-bold', null, number + 1));
 	container.append(element('div', null, null, lesson));
-	container.append(element('small', ['flex-grow-1', 'flex-shrink-0', 'text-secondary', 'text-end'], null, period));
+	container.append(element('small', ['flex-grow-1', 'flex-shrink-0', 'ps-1', 'text-secondary', 'text-end'], null, period));
 	return container;
 }
 
@@ -161,7 +161,7 @@ function tick() {
 
 document.addEventListener("DOMContentLoaded", function() {
 	const urlParams = new URLSearchParams(window.location.search);
-	const scheduleSrc = urlParams.get('schedule') ?? '1a';
+	const scheduleSrc = urlParams.get('schedule') ?? document.getElementById('default-schedule').value;
 	const root = document.getElementById('root');
 	
 	if (!scheduleSrc) {
